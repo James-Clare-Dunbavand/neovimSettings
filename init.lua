@@ -1,89 +1,3 @@
---[[
-
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
-========                                    .-----.          ========
-========         .----------------------.   | === |          ========
-========         |.-""""""""""""""""""-.|   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||   KICKSTART.NVIM   ||   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||                    ||   |-----|          ========
-========         ||:Tutor              ||   |:::::|          ========
-========         |'-..................-'|   |____o|          ========
-========         `"")----------------(""`   ___________      ========
-========        /::::::::::|  |::::::::::\  \ no mouse \     ========
-========       /:::========|  |==hjkl==:::\  \ required \    ========
-========      '""""""""""""'  '""""""""""""'  '""""""""""'   ========
-========                                                     ========
-=====================================================================
-=====================================================================
-
-What is Kickstart?
-
-  Kickstart.nvim is *not* a distribution.
-
-  Kickstart.nvim is a starting point for your own configuration.
-    The goal is that you can read every line of code, top-to-bottom, understand
-    what your configuration is doing, and modify it to suit your needs.
-
-    Once you've done that, you can start exploring, configuring and tinkering to
-    make Neovim your own! That might mean leaving Kickstart just the way it is for a while
-    or immediately breaking it into modular pieces. It's up to you!
-
-    If you don't know anything about Lua, I recommend taking some time to read through
-    a guide. One possible example which will only take 10-15 minutes:
-      - https://learnxinyminutes.com/docs/lua/
-
-    After understanding a bit more about Lua, you can use `:help lua-guide` as a
-    reference for how Neovim integrates Lua.
-    - :help lua-guide
-    - (or HTML version): https://neovim.io/doc/user/lua-guide.html
-
-Kickstart Guide:
-
-  TODO: The very first thing you should do is to run the command `:Tutor` in Neovim.
-
-    If you don't know what this means, type the following:
-      - <escape key>
-      - :
-      - Tutor
-      - <enter key>
-
-    (If you already know the Neovim basics, you can skip this step.)
-
-  Once you've completed that, you can continue working through **AND READING** the rest
-  of the kickstart init.lua.
-
-  Next, run AND READ `:help`.
-    This will open up a help window with some basic information
-    about reading, navigating and searching the builtin help documentation.
-
-    This should be the first place you go to look when you're stuck or confused
-    with something. It's one of my favorite Neovim features.
-
-    MOST IMPORTANTLY, we provide a keymap "<space>sh" to [s]earch the [h]elp documentation,
-    which is very useful when you're not exactly sure of what you're looking for.
-
-  I have left several `:help X` comments throughout the init.lua
-    These are hints about where to find more information about the relevant settings,
-    plugins or Neovim features used in Kickstart.
-
-   NOTE: Look for lines like this
-
-    Throughout the file. These are for you, the reader, to help you understand what is happening.
-    Feel free to delete them once you know what you're doing, but they should serve as a guide
-    for when you are first encountering a few different constructs in your Neovim config.
-
-If you experience any errors while trying to install kickstart, run `:checkhealth` for more info.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now! :)
---]]
-
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -102,7 +16,7 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -173,6 +87,11 @@ vim.o.confirm = true
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
+-- Write current file
+vim.keymap.set('n', '<leader>w', '<cmd>write<CR>')
+-- Write and quit
+vim.keymap.set('n', '<leader>wq', '<cmd>wq<CR>')
+
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
@@ -189,21 +108,141 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
 -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+vim.keymap.set('n', '<leader>ne', vim.cmd.Ex)
+
+vim.keymap.set('i', 'nn', '<Esc>')
+
+-- neio movement layout + i/k/u custom logic
+-- (recursive = true, i.e. noremap = false)
+-- ------------------------------------------------------------
+
+-- Normal / Visual / Operator-pending mode movement
+vim.keymap.set({ 'n', 'v', 'o' }, 'n', 'h', { noremap = false, silent = true }) -- left
+vim.keymap.set({ 'n', 'v', 'o' }, 'e', 'j', { noremap = false, silent = true }) -- down
+vim.keymap.set({ 'n', 'v', 'o' }, 'i', 'k', { noremap = false, silent = true }) -- up
+vim.keymap.set({ 'n', 'v', 'o' }, 'o', 'l', { noremap = false, silent = true }) -- right
+
+-- Opposite direction (so both hjkl and neio work)
+vim.keymap.set({ 'n', 'v', 'o' }, 'h', 'n', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'j', 'e', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'k', 'u', { noremap = false, silent = true }) -- undo
+vim.keymap.set({ 'n', 'v', 'o' }, 'u', 'i', { noremap = false, silent = true }) -- insert mode
+vim.keymap.set({ 'n', 'v', 'o' }, 'l', 'o', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'o', 'l', { noremap = false, silent = true })
+------------------------------------------------------------
+-- Uppercase equivalents
+------------------------------------------------------------
+vim.keymap.set({ 'n', 'v', 'o' }, 'N', 'H', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'E', 'J', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'I', 'K', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'O', 'L', { noremap = false, silent = true })
+
+vim.keymap.set({ 'n', 'v', 'o' }, 'H', 'N', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'J', 'E', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'K', 'U', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'U', 'I', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'L', 'O', { noremap = false, silent = true })
+vim.keymap.set({ 'n', 'v', 'o' }, 'O', 'L', { noremap = false, silent = true })
+
+------------------------------------------------------------
+-- Window navigation (<C-w> prefix)
+------------------------------------------------------------
+vim.keymap.set('n', '<C-w>n', '<C-w>h', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>e', '<C-w>j', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>i', '<C-w>k', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>o', '<C-w>l', { noremap = false, silent = true })
+
+vim.keymap.set('n', '<C-w>h', '<C-w>n', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>j', '<C-w>e', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>k', '<C-w>u', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>u', '<C-w>i', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>l', '<C-w>o', { noremap = false, silent = true })
+
+------------------------------------------------------------
+-- Window navigation (<C-w> prefix)
+------------------------------------------------------------
+vim.keymap.set('n', '<C-w>N', '<C-w>H', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>E', '<C-w>J', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>I', '<C-w>K', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>O', '<C-w>L', { noremap = false, silent = true })
+
+vim.keymap.set('n', '<C-w>H', '<C-w>N', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>J', '<C-w>E', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>K', '<C-w>U', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>U', '<C-w>I', { noremap = false, silent = true })
+vim.keymap.set('n', '<C-w>L', '<C-w>O', { noremap = false, silent = true })
+
+------------------------------------------------------------
+-- z-prefixed commands (scrolls, folds, etc.)
+------------------------------------------------------------
+vim.keymap.set('n', 'zn', 'zh', { noremap = false, silent = true })
+vim.keymap.set('n', 'ze', 'zj', { noremap = false, silent = true })
+vim.keymap.set('n', 'zi', 'zk', { noremap = false, silent = true })
+vim.keymap.set('n', 'zo', 'zl', { noremap = false, silent = true })
+
+vim.keymap.set('n', 'zh', 'zn', { noremap = false, silent = true })
+vim.keymap.set('n', 'zj', 'ze', { noremap = false, silent = true })
+vim.keymap.set('n', 'zk', 'zu', { noremap = false, silent = true })
+vim.keymap.set('n', 'zu', 'zi', { noremap = false, silent = true })
+vim.keymap.set('n', 'zl', 'zo', { noremap = false, silent = true })
+
+------------------------------------------------------------
+-- g-prefixed motions
+------------------------------------------------------------
+vim.keymap.set('n', 'gn', 'gh', { noremap = false, silent = true })
+vim.keymap.set('n', 'ge', 'gj', { noremap = false, silent = true })
+vim.keymap.set('n', 'gi', 'gk', { noremap = false, silent = true })
+vim.keymap.set('n', 'go', 'gl', { noremap = false, silent = true })
+
+vim.keymap.set('n', 'gh', 'gn', { noremap = false, silent = true })
+vim.keymap.set('n', 'gj', 'ge', { noremap = false, silent = true })
+vim.keymap.set('n', 'gk', 'gu', { noremap = false, silent = true })
+vim.keymap.set('n', 'gu', 'gi', { noremap = false, silent = true })
+vim.keymap.set('n', 'gl', 'go', { noremap = false, silent = true })
+
+vim.keymap.set({ 'n', 'v' }, '<C-d>', '<C-d>zz')
+vim.keymap.set({ 'n', 'v' }, '<C-u>', '<C-u>zz')
+vim.keymap.set('n', 'h', 'nzzzv')
+vim.keymap.set('n', 'H', 'Nzzzv')
+vim.keymap.set({ 'n', 'v' }, 'dc', 'dd')
+
+-- Create an autocmd group for netrw-specific keybindings
+vim.api.nvim_create_augroup('NetrwKeybindings', { clear = true })
+
+-- Remap n to move down and p to move up in netrw
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'netrw',
+  group = 'NetrwKeybindings',
+  callback = function()
+    -- Set buffer-local keybindings
+    --   vim.api.nvim_buf_set_keymap(0, "n", "n", "h", { noremap = true, silent = true })
+    vim.api.nvim_buf_set_keymap(0, 'n', 'e', 'j', { noremap = true, silent = true })
+    vim.api.nvim_buf_set_keymap(0, 'n', 'i', 'k', { noremap = true, silent = true })
+    --    vim.api.nvim_buf_set_keymap(0, "n", "o", "l", { noremap = true, silent = true })
+
+    -- Set buffer-local keybindings for left and right (file navigation)
+    -- <C-h> to go up a directory (like h)
+    vim.api.nvim_buf_set_keymap(0, 'n', 'n', '-', { noremap = false, silent = true })
+
+    -- <C-l> to open a file or directory (like l)
+    vim.api.nvim_buf_set_keymap(0, 'n', 'o', '<CR>', { noremap = false, silent = true })
+  end,
+})
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('n', '<leader><C-n>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<leader><C-o>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<leader><C-e>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<leader><C-i>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
--- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
--- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
--- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
--- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
+-- vim.keymap.set("n", "<C-S-n>", "<C-w>H", { desc = "Move window to the left" })
+-- vim.keymap.set("n", "<C-S-o>", "<C-w>L", { desc = "Move window to the right" })
+-- vim.keymap.set("n", "<C-S-e>", "<C-w>J", { desc = "Move window to the lower" })
+-- vim.keymap.set("n", "<C-S-i>", "<C-w>K", { desc = "Move window to the upper" })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -267,6 +306,9 @@ require('lazy').setup({
   --        end,
   --    }
   --
+  --
+  'ThePrimeagen/vim-be-good',
+  --
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`.
   --
@@ -284,6 +326,12 @@ require('lazy').setup({
     },
   },
 
+  {
+    'barrett-ruth/live-server.nvim',
+    build = 'pnpm add -g live-server',
+    cmd = { 'LiveServerStart', 'LiveServerStop' },
+    config = true,
+  },
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
   -- This is often very useful to both group configuration, as well as handle
@@ -681,7 +729,7 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
+        ts_ls = {},
         --
 
         lua_ls = {
@@ -799,12 +847,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
         opts = {},
       },
@@ -895,6 +943,12 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
+
+      vim.api.nvim_set_hl(0, 'Normal', { bg = 'none' })
+
+      vim.api.nvim_set_hl(0, 'NormalFloat', { bg = 'none' })
+
+      vim.api.nvim_set_hl(0, 'NormalNC', { bg = 'none' })
     end,
   },
 
@@ -944,7 +998,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'css', 'javascript', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
